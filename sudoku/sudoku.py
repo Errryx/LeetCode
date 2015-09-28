@@ -1,5 +1,4 @@
 #!/bin/python
-import copy
 import time
 
 puzzle = [
@@ -83,6 +82,18 @@ def isListValid(listParam):
             return False
     return True
 
+def isGuessValid(empty, puzzleParam):
+    row = getRow(empty[0], puzzleParam)
+    if isListValid(row) == False:
+        return False
+    column = getColumn(empty[1], puzzleParam)
+    if isListValid(column) == False:
+        return False
+    cell = getCell(empty[0], empty[1], puzzleParam)
+    if isListValid(cell) == False:
+        return False
+    return True
+
 def getEmpty(i, j, puzzleParam):
     if puzzleParam[i][j] == 0:
         return [i, j]
@@ -113,16 +124,18 @@ def feelingLucky(i, j):
         if suggest > 9:
             return False
         suggestPuzzle[firstEmpty[0]][firstEmpty[1]] = suggest
-        if isValid(suggestPuzzle):
-            if feelingLuckyRecusive(firstEmpty[0], firstEmpty[1], suggestPuzzle):
-                return True
-            else:
-               continue
+        if isGuessValid(firstEmpty, suggestPuzzle) == False:
+            continue
+        if feelingLuckyRecusive(firstEmpty[0], firstEmpty[1], suggestPuzzle):
+            return True
 
 def feelingLuckyRecusive(i, j, puzzleParam):
     empty = getNextEmpty(i, j, puzzleParam)
     if empty is None:
-        printPuzzle(puzzleParam)
+        if isValid(puzzleParam):
+            printPuzzle(puzzleParam)
+        else:
+            print 'Failed to solve puzzle'
         return True
     suggestPuzzle = [row[:] for row in puzzleParam]
     while True:
@@ -130,13 +143,10 @@ def feelingLuckyRecusive(i, j, puzzleParam):
         if suggest > 9:
             return False
         suggestPuzzle[empty[0]][empty[1]] = suggest
-        if isValid(suggestPuzzle):
-            if feelingLuckyRecusive(empty[0], empty[1], suggestPuzzle):
-                return True
-            else:
-               continue
-        else:
-           continue
+        if isGuessValid(empty, suggestPuzzle) == False:
+            continue
+        if feelingLuckyRecusive(empty[0], empty[1], suggestPuzzle):
+            return True
 
 def guessEmpty(empty, puzzleParam):
     return puzzleParam[empty[0]][empty[1]] + 1
